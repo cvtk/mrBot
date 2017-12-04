@@ -18,6 +18,7 @@
   "homepage": "https://github.com/cvtk/mrBot#readme",
   "dependencies": {
     "express": "^4.16.2",
+    "lowdb": "^1.0.0",
     "node-telegram-bot-api": "^0.29.0",
     "ramda": "^0.25.0"
   }

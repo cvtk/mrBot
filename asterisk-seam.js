@@ -12,11 +12,15 @@ const chatId = '-294390961';
 const token = '5274ygs1BFVps9w37F8B';
 
 function isForbiddenRequest(tkn) {
-  return R.isEmpty(tkn) || R.isNil(tkn) || tkn !== token;
+  return R.isEmpty(tkn) || tkn !== token;
 };
 
-function formatLink(text, link) {
+function _a(text, link) {
   return `<a href="${link}">${text}</a>`;
+};
+
+function _b(text) {
+  return `<strong>${text}</strong>`;
 }
 
 app.get('/incoming-call', function (req, res) {
@@ -26,20 +30,18 @@ app.get('/incoming-call', function (req, res) {
     return;
   };
 
-  if ( R.isEmpty(q.contactName) || R.isNil(q.contactName) ) {
-    res.status(500).json( { err: 'contactName varible is empty' } );
+  if ( R.isEmpty(q.phoneNumber) ) {
+    res.status(500).json( { err: 'phoneNumber varible is empty' } );
     return;
   };
 
-  if ( R.isEmpty(q.contactLink) || R.isNil(q.contactLink) ) {
-    res.status(500).json( { err: 'contactLink varible is empty' } );
+  if ( R.isEmpty(q.callId) ) {
+    res.status(500).json( { err: 'callId varible is empty' } );
     return;
   };
 
   res.status(200).json('200');
-  bot.sendMessage(chatId, `<strong>Входящий</strong> звонок от  ${ formatLink(q.contactName, q.contactLink) } ...`, { parse_mode: 'html' } );
+  bot.sendMessage(chatId, `${ _b('Входящий') } звонок от  ${ _a(q.contactName, q.contactLink) } ...`, { parse_mode: 'html' } );
 });
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
-});
+app.listen(3000);
