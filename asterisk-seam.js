@@ -11,12 +11,12 @@ const FileSync = require('lowdb/adapters/FileSync')
 const db = low( new FileSync('db.json') );
 
 const app = express();
-//const bot = new Bot( '462050712:AAFUu-f72XZ2tYwsQeSuLNUFAbNoB7O7prU', { polling: true } );
+const bot = new Bot( '462050712:AAFUu-f72XZ2tYwsQeSuLNUFAbNoB7O7prU', { polling: true } );
 const chatId = '-294390961';
 const token = '5274ygs1BFVps9w37F8B';
 
 const _html = {
-  a: function (text, link) {
+  a: function(text, link) {
     return `<a href="${link}">${text}</a>`;
   },
   b: function(text) {
@@ -29,19 +29,17 @@ function isForbiddenRequest(tkn) {
 };
 
 function _strToPhone(str) {
-  return str.replace(/\D/g,'').slice(-10);
+  return str.toString().replace(/\D/g,'').slice(-10);
 };
 
 function _phoneToStr(phn) {
   if ( typeof(phn) === 'undefined' ) return;
-  switch(phn.length) {
-    case 5: return phn.replace(/(\d{1})(\d{2})(\d{2})/, "$1-$2-$3");
-    case 6: return phn.replace(/(\d{2})(\d{2})(\d{2})/, "$1-$2-$3");
-    case 7: return phn.replace(/(\d{3})(\d{2})(\d{2})/, "$1-$2-$3");
-    case 10: return phn.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, "($1) $2-$3-$4");
-    default: return phn;
-  }
-};
+  if ( phn.length === 10 && phn.slice(0, 4) == '4852' ) {
+    return phn.slice(-6).replace(/(\d{2})(\d{2})(\d{2})/, "$1-$2-$3");
+  } else if ( phn.length === 10 ) {
+    return phn.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, "($1) $2-$3-$4");
+  } else return phn;
+}
 
 function _unixDate() {
   return Math.floor(Date.now() / 1000);
@@ -67,8 +65,8 @@ function _id(str, salt) {
 };
 
 app.get('/incoming-call', function (req, res) {
-  let q = req.query,
-      call = {};
+  let q = req.query, call = {}, message = '',
+      options = { parse_mode: 'html' }
 
   if ( isForbiddenRequest(q.token) ) {
     res.status(403).json( { err: 'forbidden, no valid token' } );
@@ -95,11 +93,12 @@ app.get('/incoming-call', function (req, res) {
   };
 
   db.defaults({ calls: [] }).write();
-
   db.get('calls').push(call).write();
 
+  message = `${ _html.b('Входящий') } звонок от ${ _html.a( _phoneToStr(call.from), 'http://770760.ru' ) }`;
+
   res.status(200).json('200');
-  //bot.sendMessage(chatId, `${ _html.b('Входящий') } звонок от  ${ _html.a(call.from, 'http:/770760.ru') } ...`, { parse_mode: 'html' } );
+  bot.sendMessage(chatId, message, options );
 });
 
 app.listen(3000);
