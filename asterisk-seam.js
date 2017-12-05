@@ -11,7 +11,7 @@ const FileSync = require('lowdb/adapters/FileSync')
 const db = low( new FileSync('db.json') );
 
 const app = express();
-const bot = new Bot( '462050712:AAFUu-f72XZ2tYwsQeSuLNUFAbNoB7O7prU', { polling: true } );
+//const bot = new Bot( '462050712:AAFUu-f72XZ2tYwsQeSuLNUFAbNoB7O7prU', { polling: true } );
 const chatId = '-294390961';
 const token = '5274ygs1BFVps9w37F8B';
 
@@ -32,9 +32,20 @@ function _strToPhone(str) {
   return str.replace(/\D/g,'').slice(-10);
 };
 
+function _phoneToStr(phn) {
+  if ( typeof(phn) === 'undefined' ) return;
+  switch(phn.length) {
+    case 5: return phn.replace(/(\d{1})(\d{2})(\d{2})/, "$1-$2-$3");
+    case 6: return phn.replace(/(\d{2})(\d{2})(\d{2})/, "$1-$2-$3");
+    case 7: return phn.replace(/(\d{3})(\d{2})(\d{2})/, "$1-$2-$3");
+    case 10: return phn.replace(/(\d{3})(\d{3})(\d{2})(\d{2})/, "($1) $2-$3-$4");
+    default: return phn;
+  }
+};
+
 function _unixDate() {
   return Math.floor(Date.now() / 1000);
-}
+};
 
 function _salt() {
   let now = new Date(),
@@ -88,7 +99,7 @@ app.get('/incoming-call', function (req, res) {
   db.get('calls').push(call).write();
 
   res.status(200).json('200');
-  bot.sendMessage(chatId, `${ _html.b('Входящий') } звонок от  ${ _html.a(call.from, 'http:/770760.ru') } ...`, { parse_mode: 'html' } );
+  //bot.sendMessage(chatId, `${ _html.b('Входящий') } звонок от  ${ _html.a(call.from, 'http:/770760.ru') } ...`, { parse_mode: 'html' } );
 });
 
 app.listen(3000);
