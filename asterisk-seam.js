@@ -5,15 +5,20 @@
 const express = require('express');
 const Bot = require('node-telegram-bot-api');
 const R = require('ramda');
+const _id = require('shortid');
 
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 const db = low( new FileSync('db.json') );
 
+require('./user-commands.js')();
+
 const app = express();
 const bot = new Bot( '462050712:AAFUu-f72XZ2tYwsQeSuLNUFAbNoB7O7prU', { polling: true } );
 const chatId = '-294390961';
 const token = '5274ygs1BFVps9w37F8B';
+
+let currentCalls = {};
 
 const _html = {
   a: function(text, link) {
@@ -45,24 +50,6 @@ function _unixDate() {
   return Math.floor(Date.now() / 1000);
 };
 
-function _salt() {
-  let now = new Date(),
-      startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  return (startOfDay / 1000).toString;
-};
-
-function _id(str, salt) {
-  let hash = 0, i, chr;
-
-  str += salt;
-  
-  for (i = 0; i < str.length; i++) {
-    chr   = str.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash;
-};
 
 app.get('/incoming-call', function (req, res) {
   let q = req.query, call = {}, message = '',
@@ -85,7 +72,7 @@ app.get('/incoming-call', function (req, res) {
 
   call = {
     from: _strToPhone(q.phoneNumber),
-    id: _id( q.callId, _salt() ),
+    id: _id.generate(),
     created: _unixDate(),
     startAt: '',
     endAt: '',
@@ -95,10 +82,13 @@ app.get('/incoming-call', function (req, res) {
   db.defaults({ calls: [] }).write();
   db.get('calls').push(call).write();
 
+  currentCalls[q.callId] = call.id;
+
   message = `${ _html.b('Входящий') } звонок от ${ _html.a( _phoneToStr(call.from), 'http://770760.ru' ) }`;
 
-  res.status(200).json('200');
+  res.status(200).json(currentCalls);
   bot.sendMessage(chatId, message, options );
+
 });
 
 app.listen(3000);
