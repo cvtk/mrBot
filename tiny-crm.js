@@ -2,22 +2,10 @@
 
 'use strict'
 
-const cfg = require('./config.json');
-
-const Bot = require('node-telegram-bot-api');
-const bot = new Bot( cfg['telegram-token'], { polling: true } );
-
-const low = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync')
-const db = low( new FileSync(cfg['db-file']) );
-
+const handlersRouter = require('./handlers-router.js');
+const bot = require('./init/bot.js');
 const _re = require('./helpers/regexp.js');
 const _id = require('shortid');
-const State = require('./helpers/state.js');
-
-let state = new State();
-
-//db.defaults({ contacts: [] }).write();
 
 function _unixDate() {
   return Math.floor(Date.now() / 1000);
@@ -83,12 +71,12 @@ function editContactHandler(msg, contactId) {
 };
 
 function createContactWNameHandler(msg, args) {
-  const userId = msg.from.id;
-  console.log(args);
+  const userId = msg.from.id,
+        name = args[args.length - 1];
+  console.log(name);
 
-    // const contactId = createContact(msg.text);
-    // state.setCurrent(userId) === '';
-    // editContactHandler(msg, contactId);
+  const contactId = createContact(name);
+  editContactHandler(msg, contactId);
 };
 
 function createContactHandler(msg, args) {
@@ -124,7 +112,9 @@ function requestsHandler(msg) {
 };
 
 function callbackQueryHandler(msg) {
-  const [ type, objectId ] = msg.data.split('__');
+  //const [ type, objectId ] = msg.data.split('__');
+  const type = msg.data.split('__')[0];
+  const objectId = msg.data.split('__')[1];
   switch( type ) {
     case 'new_contact': createContactHandler(msg.message); break;
     case 'remove_contact_confirm': removeContactConfirmHandler(msg.message, objectId); break;
@@ -135,9 +125,11 @@ function callbackQueryHandler(msg) {
   }
 };
 
-bot.onText(/(\/|\.)(con|кон|rjy|сщт)\S*(.*)/i, contactsHandler );
-bot.onText( _re(['create']), createHandler );
-bot.onText( _re(['create', 'sp', 'contact']), createContactHandler );
-bot.onText( _re(['create', 'sp', 'contact', 'sp', 'name']), createContactWNameHandler );
-bot.on( 'message', requestsHandler );
-bot.on( 'callback_query', callbackQueryHandler );
+// bot.onText(/(\/|\.)(con|кон|rjy|сщт)\S*(.*)/i, contactsHandler );
+// bot.onText( _re(['create']), createHandler );
+// bot.onText( _re(['create', 'sp', 'contact']), createContactHandler );
+// bot.onText( _re(['create', 'sp', 'contact', 'sp', 'name']), createContactWNameHandler );
+// bot.on( 'message', requestsHandler );
+// bot.on( 'callback_query', callbackQueryHandler );
+
+bot.on( 'message', handlersRouter );

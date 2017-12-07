@@ -2,7 +2,8 @@
 const re = {
   sp: '(\\s*)',
   create: '(нов|соз|доб|еще|new|cre|add|mor|\\+|yjd|cjp|lj,|tot|туц|ску|фвв|ьщк)\\S*',
-  contact: '(кон|con|rjy|сщт\\S*)'
+  contact: '(кон|con|rjy|сщт)\\S*',
+  name: '(.*)'
 };
 
 function regexp(fields) {
