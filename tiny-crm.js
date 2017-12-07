@@ -3,6 +3,7 @@
 'use strict'
 
 const handlersRouter = require('./handlers-router.js');
+const queriesRouter = require('./queries-router.js');
 const bot = require('./init/bot.js');
 const _re = require('./helpers/regexp.js');
 const _id = require('shortid');
@@ -133,3 +134,4 @@ function callbackQueryHandler(msg) {
 // bot.on( 'callback_query', callbackQueryHandler );
 
 bot.on( 'message', handlersRouter );
+bot.on( 'callback_query', queriesRouter );

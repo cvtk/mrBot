@@ -17,7 +17,7 @@ const _objToButton = function(obj, opt) {
   if ( typeof obj[opt.idField] === 'undefined' || typeof opt.cbPrefix === 'undefined' ) return false;
 
   const text = obj[opt.nameField] || 'Button',
-        callback_data = `${ obj[opt.cbPrefix] }__${ obj[opt.idField] }`;
+        callback_data = `${ opt.cbPrefix }__${ obj[opt.idField] }`;
 
   return { text, callback_data };
 };
@@ -47,7 +47,7 @@ const showContactsList = function(msg, page) {
   if ( contacts.length ) {
     const buttonOpt = {
       nameField: 'name',
-      cbPrefix: 'edit_contact',
+      cbPrefix: 'view_contact',
       idField: 'id'
     };
 

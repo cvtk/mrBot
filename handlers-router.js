@@ -2,11 +2,8 @@
 
 const getCommandHandler = function(cmd) {
   const handlerPath = `./handlers/${ cmd }.js`;
-
   const handler = require(handlerPath);
-
   // try {
-  //   console.log(require.resolve(handlerPath))
   //   if ( require.resolve(handlerPath) ) {
   //     const handler = require(handlerPath);
   //   }
