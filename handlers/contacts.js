@@ -34,20 +34,47 @@ const needContactsList = function(args) {
   return args.length === 1;
 };
 
-const showContactsList = function(msg, page) {
+const detailView = function(msg, contactId, isQueryCallback) {
+  if ( typeof contactId === 'undefined' ) return;
+
+  const chat_id = msg.chat.id,
+        message_id = msg.message_id,
+        opt = {}
+
+  let buttons = [
+    { text: 'Рабочий тел.', callback_data: `edit_contact_phone__${ contactId }` },
+    { text: 'Личный тел.', callback_data: `edit_contact_mobile__${ contactId }` },
+    { text: 'Заметка', callback_data: `edit_contact_note__${ contactId }` },
+    { text: 'Удалить', callback_data: `remove_contact_confirm__${ contactId }` }],
+      opt = { parse_mode: 'html' }
+
+  const contact = db.get('contacts').find({ id: contactId }).value();
+  const message = `Сделай ему предложение, от которого он не сможет отказаться\n<strong>Имя:</strong> ${ contact.name }\n<strong>Рабочий:</strong> ${ contact.phone || '\uD83D\uDEAB' }\n<strong>Личный:</strong> ${ contact.mobile || '\uD83D\uDEAB' }\n${ contact.note? '<pre>' + contact.note + '</pre>': '' }`;
+
+  if ( isQueryCallback ) {
+    buttons.push( { text: '« Контакты', callback_data: 'view_contacts' } );
+    opt.reply_markup = JSON.stringify({ inline_keyboard: _arrToChunks(buttons, 2) });
+    bot.editMessageReplyMarkup(opt.reply_markup, { chat_id, message_id });
+  }
+  else {
+    opt.reply_markup = JSON.stringify({ inline_keyboard: _arrToChunks(buttons, 2) });
+    bot.sendMessage(chatId, message, opt );
+  }
+}
+
+const listView = function(msg, page) {
   const chatId = msg.chat.id,
         from = msg.from,
         limit = 6;
 
-  let options = { parse_mode: 'html' },
-      navButtons = [];
+  let options = { parse_mode: 'html' };
 
   const contacts = db.get('contacts').value();
 
   if ( contacts.length ) {
     const buttonOpt = {
       nameField: 'name',
-      cbPrefix: 'view_contact',
+      cbPrefix: 'detail_contact',
       idField: 'id'
     };
 
@@ -73,6 +100,6 @@ const showContactsList = function(msg, page) {
   }
 };
 
-module.exports = function contactsHandler(msg, args) {
-  if ( needContactsList(args) ) return showContactsList(msg, 1);
+module.exports = function contactsHandler(msg, query, isQueryCallback) {
+  if ( query.action === 'list' ) return listView(msg, 1);
 }
