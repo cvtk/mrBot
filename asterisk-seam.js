@@ -82,9 +82,8 @@ app.get('/incoming-call', function (req, res) {
 
   currentCalls[q.id] = call.id;
 
-  const from = q.name ? `${ q.name } ${ _phoneToStr(call.from) }` : _phoneToStr(call.from);
-  message = `${ _html.b('Входящий') } звонок от ${ _html.a( from, q.link ) }`;
-
+  const from = q.name? `${ q.name } ${ _phoneToStr(call.from) }` :_phoneToStr(call.from);
+  message = `${ _html.b('Входящий') } звонок от ${ _html.a( from, decodeURI( q.link ) ) }`;
 
   res.status(200).json(currentCalls);
   bot.sendMessage(chatId, message, options );
