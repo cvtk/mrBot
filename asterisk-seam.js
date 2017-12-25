@@ -11,8 +11,6 @@ const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 const db = low( new FileSync('db.json') );
 
-require('./user-commands.js')();
-
 const app = express();
 const bot = new Bot( '462050712:AAFUu-f72XZ2tYwsQeSuLNUFAbNoB7O7prU', { polling: true } );
 const chatId = '-294390961';
@@ -60,18 +58,18 @@ app.get('/incoming-call', function (req, res) {
     return;
   };
 
-  if ( R.isEmpty(q.phoneNumber) ) {
+  if ( R.isEmpty(q.phone) ) {
     res.status(500).json( { err: 'phoneNumber varible is empty' } );
     return;
   };
 
-  if ( R.isEmpty(q.callId) ) {
+  if ( R.isEmpty(q.id) ) {
     res.status(500).json( { err: 'callId varible is empty' } );
     return;
   };
 
   call = {
-    from: _strToPhone(q.phoneNumber),
+    from: _strToPhone(q.phone),
     id: _id.generate(),
     created: _unixDate(),
     startAt: '',
@@ -82,9 +80,11 @@ app.get('/incoming-call', function (req, res) {
   db.defaults({ calls: [] }).write();
   db.get('calls').push(call).write();
 
-  currentCalls[q.callId] = call.id;
+  currentCalls[q.id] = call.id;
 
-  message = `${ _html.b('Входящий') } звонок от ${ _html.a( _phoneToStr(call.from), 'http://770760.ru' ) }`;
+  const from = q.name ? `${ q.name } ${ _phoneToStr(call.from) }` : _phoneToStr(call.from);
+  message = `${ _html.b('Входящий') } звонок от ${ _html.a( from, q.link ) }`;
+
 
   res.status(200).json(currentCalls);
   bot.sendMessage(chatId, message, options );
